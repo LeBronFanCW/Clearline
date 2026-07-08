@@ -1,0 +1,108 @@
+name: Release Clearline
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 1.0.4"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: clearline-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-15
+    env:
+      SPARKLE_PUBLIC_KEY: Wk3AZcScVaGGAa2Wq7SG6VkQ6S1pdoOxKI8irozsvw8=
+      UPDATE_FEED_URL: https://raw.githubusercontent.com/LeBronFanCW/Clearline/main/appcast.xml
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            TAG="$GITHUB_REF_NAME"
+          else
+            VERSION="${{ inputs.version }}"
+            TAG="v$VERSION"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Test
+        run: swift test
+
+      - name: Build update-enabled app
+        env:
+          CLEARLINE_VERSION: ${{ steps.version.outputs.version }}
+          CLEARLINE_BUILD_NUMBER: ${{ github.run_number }}
+          CLEARLINE_UPDATE_FEED_URL: ${{ env.UPDATE_FEED_URL }}
+          CLEARLINE_UPDATE_PUBLIC_KEY: ${{ env.SPARKLE_PUBLIC_KEY }}
+        run: ./scripts/build-app.sh
+
+      - name: Package release files
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/appcast-source" "$RUNNER_TEMP/dmg-root"
+          ditto -c -k --sequesterRsrc --keepParent \
+            outputs/Clearline.app "$RUNNER_TEMP/appcast-source/Clearline-$VERSION.zip"
+          ditto outputs/Clearline.app "$RUNNER_TEMP/dmg-root/Clearline.app"
+          ln -s /Applications "$RUNNER_TEMP/dmg-root/Applications"
+          hdiutil create -volname "Clearline Installer" -srcfolder "$RUNNER_TEMP/dmg-root" \
+            -ov -format UDZO "$RUNNER_TEMP/Clearline-$VERSION.dmg"
+
+      - name: Generate signed Sparkle feed
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          test -n "$SPARKLE_PRIVATE_KEY"
+          echo "$SPARKLE_PRIVATE_KEY" | \
+            .build/artifacts/sparkle/Sparkle/bin/generate_appcast \
+            --ed-key-file - \
+            --download-url-prefix "https://github.com/LeBronFanCW/Clearline/releases/download/$TAG/" \
+            --link "https://github.com/LeBronFanCW/Clearline" \
+            -o appcast.xml \
+            "$RUNNER_TEMP/appcast-source"
+
+      - name: Publish GitHub Release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" \
+            "$RUNNER_TEMP/appcast-source/Clearline-$VERSION.zip" \
+            "$RUNNER_TEMP/Clearline-$VERSION.dmg" \
+            --title "Clearline $VERSION" \
+            --generate-notes
+
+      - name: Publish update feed
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          cp "$RUNNER_TEMP/appcast-source/appcast.xml" "$RUNNER_TEMP/appcast.xml"
+          git fetch origin main
+          git checkout main
+          cp "$RUNNER_TEMP/appcast.xml" appcast.xml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          git commit -m "Update Sparkle feed for $TAG"
+          git push origin main
