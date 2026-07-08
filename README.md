@@ -2,7 +2,7 @@
 
 Clearline detects a Samsung phone connected over USB, helps its rightful owner check common eligibility requirements, and opens the original carrier’s official unlock path. It deliberately does **not** bypass carrier authorization, blacklists, payment status, or theft protections.
 
-Current release: **1.0.3 (build 4)**. This release embeds Sparkle under `Contents/Frameworks`, includes the required runtime search path, and detects Samsung hardware through both `system_profiler` and IOKit. Optional ADB enrichment supports model and original-carrier hints.
+Current release: **1.0.4 (build 5)**. This release embeds Sparkle under `Contents/Frameworks`, includes the required runtime search path, and detects Samsung hardware through both `system_profiler` and IOKit. Optional ADB enrichment supports model and original-carrier hints.
 
 ## Build the drag-to-Applications installer
 
@@ -10,7 +10,7 @@ Current release: **1.0.3 (build 4)**. This release embeds Sparkle under `Content
 ./scripts/build-dmg.sh
 ```
 
-This creates `outputs/Clearline-1.0.3.dmg` with the standard macOS Clearline → Applications installation layout.
+This creates `outputs/Clearline-1.0.4.dmg` with the standard macOS Clearline → Applications installation layout.
 
 ## Run locally
 
@@ -52,4 +52,4 @@ CLEARLINE_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" \
 
 Use Sparkle's `generate_keys` and `generate_appcast` tools to create and sign releases. Keep the private EdDSA key out of the repository and update server. Public releases should also be Developer ID signed and notarized by Apple.
 
-GitHub release tags matching `v*` run `.github/workflows/release.yml`. The workflow tests and builds the app, publishes a ZIP for Sparkle and a DMG for people, then commits the signed `appcast.xml` update feed to the default branch.
+Changes pushed to `main`, release tags matching `v*`, and manual release runs invoke `.github/workflows/release.yml`. The workflow tests and builds the app, publishes a ZIP for Sparkle and a DMG for people, then commits the signed `appcast.xml` update feed to the default branch. Appcast-only bot commits are ignored so publishing a feed cannot trigger an update loop.

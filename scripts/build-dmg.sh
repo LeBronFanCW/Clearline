@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="${0:A:h:h}"
-VERSION="${CLEARLINE_VERSION:-1.0.3}"
+VERSION="${CLEARLINE_VERSION:-1.0.4}"
 VOLUME_NAME="Clearline Installer"
 STAGE="$ROOT/work/dmg-stage"
 MOUNT="/Volumes/$VOLUME_NAME"
