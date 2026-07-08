@@ -3,14 +3,14 @@
     <channel>
         <title>Clearline</title>
         <item>
-            <title>1.0.3</title>
-            <pubDate>Wed, 08 Jul 2026 10:37:38 -0400</pubDate>
+            <title>1.0.4</title>
+            <pubDate>Wed, 08 Jul 2026 14:40:39 +0000</pubDate>
             <link>https://github.com/LeBronFanCW/Clearline</link>
-            <sparkle:version>1</sparkle:version>
-            <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <enclosure url="https://github.com/LeBronFanCW/Clearline/releases/download/v1.0.3/Clearline-1.0.3.zip" length="2016683" type="application/octet-stream" sparkle:edSignature="/qCDOZ9zsPsmh/rK5rXXs05rUi1SdO9VBMDF4VFKULxrtDxyqvAvXlhWcVCvbtknoQc+zktuntsR6mL5cug8Aw=="/>
+            <enclosure url="https://github.com/LeBronFanCW/Clearline/releases/download/build-2/Clearline-1.0.4.zip" length="2016684" type="application/octet-stream" sparkle:edSignature="GUVGQEQOH3UKkMpxeWGdg3nnKnbANo7ApxngwDzcb+WXhhbDV8Bx5T/q0yIie2zSW+yc3pikcT+0z43hQSWQBQ=="/>
         </item>
     </channel>
 </rss>
