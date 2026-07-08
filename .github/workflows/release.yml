@@ -79,7 +79,7 @@ jobs:
             --ed-key-file - \
             --download-url-prefix "https://github.com/LeBronFanCW/Clearline/releases/download/$TAG/" \
             --link "https://github.com/LeBronFanCW/Clearline" \
-            -o appcast.xml \
+            -o "$RUNNER_TEMP/appcast.xml" \
             "$RUNNER_TEMP/appcast-source"
 
       - name: Publish GitHub Release
@@ -97,7 +97,6 @@ jobs:
         env:
           TAG: ${{ steps.version.outputs.tag }}
         run: |
-          cp "$RUNNER_TEMP/appcast-source/appcast.xml" "$RUNNER_TEMP/appcast.xml"
           git fetch origin main
           git checkout main
           cp "$RUNNER_TEMP/appcast.xml" appcast.xml
